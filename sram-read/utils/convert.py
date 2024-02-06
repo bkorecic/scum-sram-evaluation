@@ -20,7 +20,7 @@ def convert(csv_path):
             t0 = float(line[0])
             t1 = float(line[1])
             if len(line[2]) != EXPECTED_DATA_LEN:
-                print(f'Row {i} has incomplete or corrupted data')
+                print(f'Row {i+1} has incomplete or corrupted data')
                 sys.exit(1)
             data = bytearray.fromhex(line[2])
             # reverse each 8 byte chunk because of little endianess
