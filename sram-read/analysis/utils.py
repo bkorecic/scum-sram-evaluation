@@ -50,4 +50,3 @@ def read_results(files: list[pathlib.Path]) -> list[Result]:
             except EOFError:
                 pass
     return results
-

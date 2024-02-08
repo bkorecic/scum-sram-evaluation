@@ -21,9 +21,9 @@ def ber(results: list[Result]):
         # Calculate hamming distance between
         # each vector and the nominal vector
         avg += hamming_distance(results[0].data, results[i].data)
-        
+
     # Get average hamming distance
-    avg /= len(results)-1 
+    avg /= len(results)-1
     # Divide by amount of bits to get BER percentage
     ber = avg / len(results[0].data)
     return ber
