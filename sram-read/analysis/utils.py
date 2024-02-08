@@ -13,28 +13,8 @@ class Result:
         self.data = np.unpackbits(np.frombuffer(data, dtype=np.uint8))
 
 
-def get_bit(bytearr, index):
-    """
-    Given a numpy byte array and an index, return the bit at that index.
-    """
-    byte_index = index // 8
-    bit_index = index % 8
-    return (bytearr[byte_index] >> bit_index) & 1
-
-
-def set_bit(bytearr: np.ndarray, index: int, value: int):
-    """
-    Given a numpy byte array, set the bit at the
-    index to the given value (0 or 1).
-    """
-    byte_index = index // 8
-    bit_index = index % 8
-    if value == 1:
-        bytearr[byte_index] |= (1 << bit_index)
-    elif value == 0:
-        bytearr[byte_index] &= ~(1 << bit_index)
-    else:
-        raise ValueError("Value should be 0 or 1")
+def hamming_distance(bit_arr1: np.ndarray, bit_arr2: np.ndarray) -> int:
+    return np.sum(bit_arr1 ^ bit_arr2)
 
 
 def get_files() -> dict:
@@ -70,3 +50,4 @@ def read_results(files: list[pathlib.Path]) -> list[Result]:
             except EOFError:
                 pass
     return results
+

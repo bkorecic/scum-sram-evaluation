@@ -1,6 +1,5 @@
 import logging
-from utils import Result, get_bit, set_bit
-import numpy as np
+from utils import Result, hamming_distance
 
 
 def ber(results: list[Result]):
@@ -19,6 +18,12 @@ def ber(results: list[Result]):
         return
     avg = 0.0
     for i in range(1, len(results)):
-        # Calculate hamming distance
+        # Calculate hamming distance between
+        # each vector and the nominal vector
+        avg += hamming_distance(results[0].data, results[i].data)
         
-        
+    # Get average hamming distance
+    avg /= len(results)-1 
+    # Divide by amount of bits to get BER percentage
+    ber = avg / len(results[0].data)
+    return ber
