@@ -2,7 +2,7 @@ import logging
 from utils import Result, hamming_distance
 
 
-def ber(results: list[Result]):
+def bit_error_rate(results: list[Result]):
     """
     Given a list of results, calculate the bit error rate.
 

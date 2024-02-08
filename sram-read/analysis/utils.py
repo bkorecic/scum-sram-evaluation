@@ -4,6 +4,10 @@ import numpy as np
 
 
 class Result:
+    """
+    Class to represent a single readout from a chip
+    """
+
     def __init__(self,
                  start_timestamp: float,
                  end_timestamp: float,
@@ -14,6 +18,9 @@ class Result:
 
 
 def hamming_distance(bit_arr1: np.ndarray, bit_arr2: np.ndarray) -> int:
+    """
+    Calculate the Hamming distance between two bit arrays
+    """
     return np.sum(bit_arr1 ^ bit_arr2)
 
 

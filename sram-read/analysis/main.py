@@ -1,16 +1,20 @@
 from utils import get_files, read_results
-from analysis import ber
+from analysis import bit_error_rate
 
+# Add the chips you want to evaluate here
 CHIPS_TO_EVALUATE = ["M42", "M47", "L45"]
-FUNS_TO_RUN = [ber]
+FUNCTIONS_TO_RUN = [bit_error_rate]  # Add the functions you want to run here
 
 
 def main():
+    """
+    Entry point. Get the files, read the results and run the functions.
+    """
     all_results = get_files()
     for chip_id in CHIPS_TO_EVALUATE:
         print("Evaluating chip", chip_id)
         results = read_results(all_results[chip_id])
-        for fun in FUNS_TO_RUN:
+        for fun in FUNCTIONS_TO_RUN:
             print(fun(results))
 
 
