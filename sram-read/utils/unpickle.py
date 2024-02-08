@@ -19,6 +19,7 @@ def unpickle(pickle_path):
 
     for row in data:
         print(row[0], row[1], row[2][:50].hex())
+    print("Number of rows:", len(data))
 
 
 if __name__ == '__main__':
