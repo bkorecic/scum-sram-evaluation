@@ -3,7 +3,9 @@ from analysis import bit_error_rate
 
 # Add the chips you want to evaluate here
 CHIPS_TO_EVALUATE = ["M42", "M47", "L45"]
-FUNCTIONS_TO_RUN = [bit_error_rate]  # Add the functions you want to run here
+
+# Add the functions you want to run here
+FUNCTIONS_TO_RUN = [bit_error_rate]
 
 
 def main():
