@@ -1,8 +1,11 @@
+import numpy as np
 import logging
+import matplotlib.pyplot as plt
+from scipy.signal import correlate
 from utils import Result, hamming_distance
 
 
-def bit_error_rate(results: list[Result]):
+def bit_error_rate(results: list[Result], chip):
     """
     Given a list of results, calculate the bit error rate.
 
@@ -27,3 +30,28 @@ def bit_error_rate(results: list[Result]):
     # Divide by amount of bits to get BER percentage
     ber = avg / len(results[0].data)
     return ber
+
+
+def autocorrelation(results: list[Result], chip):
+    """
+    Given a list of results, calculate the autocorrelation.
+
+    The calculation is done with the scipy.signal.correlate method.
+
+    results -- list of results to analyse the autocorrelation.
+               Only the first one will be used.
+    """
+    data = results[0].data.astype(np.int8)
+    data[data == 0] = -1  # Replace 0s with -1s
+    data = data.astype(np.float64)
+    autocorr = correlate(data, data, mode='full', method='fft')
+    autocorr /= np.max(autocorr)
+
+    time_axis = np.arange(-len(data)+1, len(data))
+    plt.scatter(time_axis, autocorr, marker='.')
+    plt.title(f'Autocorrelation for SCuM {chip}')
+
+    plt.tight_layout()
+    plt.show()
+
+    return None

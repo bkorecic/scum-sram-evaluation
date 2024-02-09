@@ -1,11 +1,11 @@
 from utils import get_files, read_results
-from analysis import bit_error_rate
+from analysis import bit_error_rate, autocorrelation
 
 # Add the chips you want to evaluate here
-CHIPS_TO_EVALUATE = ["M42", "M47", "L45"]
+CHIPS_TO_EVALUATE = ["L45"]
 
 # Add the functions you want to run here
-FUNCTIONS_TO_RUN = [bit_error_rate]
+FUNCTIONS_TO_RUN = [bit_error_rate, autocorrelation]
 
 
 def main():
@@ -17,7 +17,7 @@ def main():
         print("Evaluating chip", chip_id)
         results = read_results(all_results[chip_id])
         for fun in FUNCTIONS_TO_RUN:
-            print(fun(results))
+            print(fun(results, chip_id))
 
 
 if __name__ == "__main__":
