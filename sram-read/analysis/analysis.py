@@ -61,7 +61,7 @@ def bit_error_rate(results: list[Result], **kwargs):
     plt.gca().xaxis.set_major_formatter(PercentFormatter(xmax=1.0, decimals=2))
 
 
-def autocorrelation(results: list[Result], chip):
+def autocorrelation(results: list[Result], **kwargs):
     """
     Given a list of results, calculate the autocorrelation.
 
@@ -70,6 +70,7 @@ def autocorrelation(results: list[Result], chip):
     results -- list of results to analyse the autocorrelation.
                Only the first one will be used.
     """
+    chip_id = kwargs.get('chip_id', 'unknown')
     data = results[0].data.astype(np.int8)
     data[data == 0] = -1  # Replace 0s with -1s
     data = data.astype(np.float64)
@@ -78,7 +79,7 @@ def autocorrelation(results: list[Result], chip):
 
     time_axis = np.arange(-len(data)+1, len(data))
     plt.scatter(time_axis, autocorr, marker='.')
-    plt.title(f'Autocorrelation for SCuM {chip}')
+    plt.title(f'Autocorrelation for {chip_id}')
 
     plt.tight_layout()
     plt.show()
