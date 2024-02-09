@@ -3,11 +3,12 @@ import logging
 import matplotlib.pyplot as plt
 from scipy.signal import correlate
 from utils import Result, hamming_distance
+from matplotlib.ticker import PercentFormatter
 
 
-def bit_error_rate(results: list[Result], chip):
+def bit_error_rate(results: list[Result], **kwargs):
     """
-    Given a list of results, calculate the bit error rate.
+    Given a list of results, calculate metrics related to the bit error rate.
 
     The calculation is done as follows: the first result is chosen
     as the nominal data, then the hamming distance is calculated
@@ -16,20 +17,48 @@ def bit_error_rate(results: list[Result], chip):
 
     results -- list of results to analyse the BER. Must have at least 2
     """
-    if len(results) < 2:
-        logging.error("Need at least two results to calculate BER.")
+    if len(results) < 1001:
+        logging.error("Need at least 1001 results to analyse error rates.")
         return
-    avg = 0.0
-    for i in range(1, len(results)):
+
+    chip_id = kwargs.get('chip_id', 'unknown')
+
+    n_bits = results[0].data.size
+    nominal_data = results[0].data
+    results = results[1:1+1000]
+
+    hds = np.empty(len(results))  # Hamming distances
+    avg_hd = 0.0
+    min_hd = np.inf
+    max_hd = -np.inf
+    for i in range(len(results)):
         # Calculate hamming distance between
         # each vector and the nominal vector
-        avg += hamming_distance(results[0].data, results[i].data)
+        hds[i] = hamming_distance(nominal_data, results[i].data)
+        min_hd = min(min_hd, hds[i])
+        max_hd = max(max_hd, hds[i])
+        avg_hd += hds[i]
 
     # Get average hamming distance
-    avg /= len(results)-1
+    avg_hd /= len(results)
+
     # Divide by amount of bits to get BER percentage
-    ber = avg / len(results[0].data)
-    return ber
+    ber = avg_hd / n_bits
+    error_rates = np.round(hds / n_bits, 4)
+    print(f'Chip {chip_id}:')
+    print(f'\tAverage BER (bit error rate): {ber:.2%}')
+    print(f'\tMinimum BER (bit error rate): {min_hd / n_bits:.2%}')
+    print(f'\tMaximum BER (bit error rate): {max_hd / n_bits:.2%}')
+
+    unique, counts = np.unique(error_rates, return_counts=True)
+    plt.plot(unique, counts, marker='.', label=chip_id)
+    plt.title('Frequency of bit error rates')
+    # Label the axes
+    plt.xlabel('Error rate (%)')
+    plt.ylabel('Count')
+    plt.legend()
+    # Add percentage sign to x axis
+    plt.gca().xaxis.set_major_formatter(PercentFormatter(xmax=1.0, decimals=2))
 
 
 def autocorrelation(results: list[Result], chip):
