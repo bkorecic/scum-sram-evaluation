@@ -1,11 +1,12 @@
 import questionary
 import matplotlib.pyplot as plt
 from utils import get_files, read_results
-from analysis import bit_error_rate, autocorrelation
+from analysis import bit_error_rate, autocorrelation, fractional_hamming_weight
 
 ANALYSIS_FUNCTIONS = {
     "Autocorrelation (plot)": autocorrelation,
-    "Error rate analysis (plot+data)": bit_error_rate
+    "Error rate analysis (plot+data)": bit_error_rate,
+    "Fractional Hamming Weight (plot+data)": fractional_hamming_weight
 }
 
 
@@ -26,10 +27,9 @@ def main():
     ).ask()
 
     for fun in functions_to_run:
-        fig, ax = plt.subplots()
-        for chip_id in chips_to_evaluate:
+        for i, chip_id in enumerate(chips_to_evaluate):
             results = read_results(all_results[chip_id])
-            ANALYSIS_FUNCTIONS[fun](results, chip_id=chip_id, fig=fig, ax=ax)
+            ANALYSIS_FUNCTIONS[fun](results, chip_id=chip_id, chip_index=i)
         plt.show()
 
 

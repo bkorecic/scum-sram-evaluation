@@ -2,6 +2,7 @@ import numpy as np
 import logging
 import matplotlib.pyplot as plt
 from scipy.signal import correlate
+from scipy.stats import binom
 from utils import Result, hamming_distance
 from matplotlib.ticker import PercentFormatter
 
@@ -85,3 +86,54 @@ def autocorrelation(results: list[Result], **kwargs):
     plt.show()
 
     return None
+
+
+def fractional_hamming_weight(results: list[Result], **kwargs):
+    """
+    Given a list of results, calculate the fractional hamming weight.
+
+    The calculation is done as follows: the fractional hamming weight is
+    calculated for all the (first 1000) results as the average bit value,
+    and then the average between all of them is calculated.
+    """
+    if len(results) < 1001:
+        logging.error("Need at least 1001 results to analyse "
+                      "fractional hamming weight.")
+        return
+
+    results = results[:1000]
+    chip_id = kwargs.get('chip_id', 'unknown')
+
+    avg_fhw = 0.0
+    for result in results:
+        avg_fhw += np.mean(result.data)
+    avg_fhw /= len(results)
+
+    print(f'Fractional hamming weight for chip {chip_id}: {avg_fhw:.6f}')
+
+    # Parameters for the binomial distribution
+    n = 1000
+    p = 0.5
+
+    chip_index = kwargs.get('chip_index')
+
+    if chip_index == 0:  # Only plot the binomial distribution once
+        x_values = np.arange(0, n)
+
+        # Calculate the binomial PMF
+        binomial_pmf = binom.pmf(x_values, n, p)
+
+        # Plot the normalized binomial distribution
+        plt.plot(x_values / n, binomial_pmf, label='Binomial Distribution')
+
+    plt.title('Mean of start-up values of all SRAM cells')
+    plt.xlabel('Mean')
+    plt.ylabel('Probability')
+    plt.xticks(np.arange(0.45, 0.6, 0.01))
+    plt.xlim(0.45, 0.55)
+
+    # Plot the average fractional hamming weight
+    plt.scatter([avg_fhw], [binom.pmf(int(avg_fhw*1000), n, p)],
+                label=chip_id)
+
+    plt.legend()
