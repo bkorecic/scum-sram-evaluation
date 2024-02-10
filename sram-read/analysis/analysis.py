@@ -103,6 +103,7 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
 
     results = results[:1000]
     chip_id = kwargs.get('chip_id', 'unknown')
+    n_bits = results[0].data.size
 
     avg_fhw = 0.0
     for result in results:
@@ -112,7 +113,7 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
     print(f'Fractional hamming weight for chip {chip_id}: {avg_fhw:.6f}')
 
     # Parameters for the binomial distribution
-    n = 1000
+    n = n_bits
     p = 0.5
 
     chip_index = kwargs.get('chip_index')
@@ -133,7 +134,7 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
     plt.xlim(0.45, 0.55)
 
     # Plot the average fractional hamming weight
-    plt.scatter([avg_fhw], [binom.pmf(int(avg_fhw*1000), n, p)],
+    plt.scatter([avg_fhw], [binom.pmf(int(avg_fhw*n), n, p)],
                 label=chip_id)
 
     plt.legend()
