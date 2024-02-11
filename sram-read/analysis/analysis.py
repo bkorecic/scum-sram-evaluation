@@ -127,11 +127,11 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
         # Plot the normalized binomial distribution
         plt.plot(x_values / n, binomial_pmf, label='Binomial Distribution')
 
-    plt.title('Mean of start-up values of all SRAM cells')
+    plt.title('Mean of Start-up Values of All SRAM Cells')
     plt.xlabel('Mean')
-    plt.ylabel('Probability')
+    plt.ylabel('Probability of Occurence')
     plt.xticks(np.arange(0.45, 0.6, 0.01))
-    plt.xlim(0.45, 0.55)
+    plt.xlim(0.48, 0.52)
 
     # Plot the average fractional hamming weight
     plt.scatter([avg_fhw], [binom.pmf(int(avg_fhw*n), n, p)],
