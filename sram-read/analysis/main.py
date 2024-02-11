@@ -4,7 +4,7 @@ from utils import get_files, read_results
 from analysis import bit_error_rate, autocorrelation, fractional_hamming_weight
 
 ANALYSIS_FUNCTIONS = {
-    "Autocorrelation (plot)": autocorrelation,
+    "Autocorrelation (plot+data)": autocorrelation,
     "Error rate analysis (plot+data)": bit_error_rate,
     "Fractional Hamming Weight (plot+data)": fractional_hamming_weight
 }

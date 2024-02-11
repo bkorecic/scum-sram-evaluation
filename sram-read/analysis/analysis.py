@@ -52,11 +52,11 @@ def bit_error_rate(results: list[Result], **kwargs):
     print(f'\tMaximum BER (bit error rate): {max_hd / n_bits:.2%}')
 
     unique, counts = np.unique(error_rates, return_counts=True)
-    plt.plot(unique, counts, marker='.', label=chip_id)
-    plt.title('Frequency of bit error rates')
+    plt.plot(unique, counts, label=chip_id)
+    # plt.title('Frequency of bit error rates')
     # Label the axes
-    plt.xlabel('Error rate (%)')
-    plt.ylabel('Count')
+    plt.xlabel('BER (%)')
+    plt.ylabel('Frequency')
     plt.legend()
     # Add percentage sign to x axis
     plt.gca().xaxis.set_major_formatter(PercentFormatter(xmax=1.0, decimals=2))
@@ -73,17 +73,36 @@ def autocorrelation(results: list[Result], **kwargs):
     """
     chip_id = kwargs.get('chip_id', 'unknown')
     data = results[0].data.astype(np.int8)
+    n = len(data)
     data[data == 0] = -1  # Replace 0s with -1s
     data = data.astype(np.float64)
     autocorr = correlate(data, data, mode='full', method='fft')
-    autocorr /= np.max(autocorr)
+    autocorr /= n
+
+    # Spotting the max correlation value at lag = -512 and lag = 512
+    print(f'Chip {chip_id}:')
+    print(f'\tCorrelation at lag -511 : {autocorr[450046]}')
+    print(f'\tCorrelation at lag -512 : {autocorr[450047]}')
+    print(f'\tCorrelation at lag -513 : {autocorr[450048]}')
+    print(f'\tCorrelation at lag 512 : {autocorr[451071]}')
 
     time_axis = np.arange(-len(data)+1, len(data))
     plt.scatter(time_axis, autocorr, marker='.')
     plt.title(f'Autocorrelation for {chip_id}')
-
+    plt.xlabel('Lag')
+    plt.ylabel('Correlation')
     plt.tight_layout()
     plt.show()
+
+    # Derive the highest three autocorrelation values and their corresponding lag values
+    # takes too much time
+    # top3_ind = np.argpartition(autocorr, -3)[-3:]
+    # print('test')
+    # print(f'test: {top3_ind}')
+    # top3_val = autocorr[top3_ind]
+    # top3_lag = time_axis[top3_ind]
+    # print(f'Maximum autocorrelation values: {top3_val}:')
+    # print(f'Their indices: {top3_lag}')
 
     return None
 
@@ -127,7 +146,7 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
         # Plot the normalized binomial distribution
         plt.plot(x_values / n, binomial_pmf, label='Binomial Distribution')
 
-    plt.title('Mean of Start-up Values of All SRAM Cells')
+    # plt.title('Mean of Start-up Values of All SRAM Cells')
     plt.xlabel('Mean')
     plt.ylabel('Probability of Occurence')
     plt.xticks(np.arange(0.45, 0.6, 0.01))
