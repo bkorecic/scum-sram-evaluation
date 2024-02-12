@@ -1,5 +1,6 @@
 import numpy as np
 import logging
+import itertools
 import matplotlib.pyplot as plt
 from scipy.signal import correlate
 from scipy.stats import binom
@@ -157,3 +158,15 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
                 label=chip_id)
 
     plt.legend()
+
+
+def inter_chip_hamming_distance(all_results):
+    avg = 0.0
+    for results_1, results_2 in itertools.combinations(all_results.values(),
+                                                       r=2):
+        d1 = results_1[0].data
+        d2 = results_2[0].data
+        n_bits = d1.size
+        avg += hamming_distance(d1, d2) / n_bits
+    avg /= len(all_results)
+    print(f'Inter-chip hamming distance: {avg:.6f}')
