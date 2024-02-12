@@ -4,7 +4,8 @@ from utils import get_files, read_results
 from analysis import (bit_error_rate,
                       autocorrelation,
                       fractional_hamming_weight,
-                      inter_chip_hamming_distance)
+                      inter_chip_hamming_distance,
+                      stability)
 
 
 class AnalysisFunction:
@@ -17,7 +18,8 @@ ANALYSIS_FUNCTIONS = {
     "Autocorrelation (plot+data)": AnalysisFunction(autocorrelation),
     "Error rate analysis (plot+data)": AnalysisFunction(bit_error_rate),
     "Fractional Hamming Weight (plot+data)": AnalysisFunction(fractional_hamming_weight),
-    "Inter-chip hamming distance": AnalysisFunction(inter_chip_hamming_distance, inter=True)
+    "Inter-chip hamming distance": AnalysisFunction(inter_chip_hamming_distance, inter=True),
+    "Cell stability (heatmap plot)": AnalysisFunction(stability)
 }
 
 

@@ -2,6 +2,7 @@ import numpy as np
 import logging
 import itertools
 import matplotlib.pyplot as plt
+import math
 from scipy.signal import correlate
 from scipy.stats import binom
 from utils import Result, hamming_distance
@@ -161,7 +162,46 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
 
 
 def stability(results: list[Result], **kwargs):
-    pass
+    if len(results) < 1000:
+        logging.error("Need at least 1000 results to analyse stability.")
+        return
+    results = results[:1000]
+    n_bits = results[0].data.size
+
+    bit_freq_1 = np.zeros(n_bits)  # Frequency of 1 in each bit position
+    for result in results:
+        for i in range(n_bits):
+            bit_freq_1[i] += result.data[i]
+
+    stable_bits = 0
+    stability = np.empty(n_bits, dtype=np.float64)
+    for i in range(n_bits):
+        freq_1 = bit_freq_1[i]
+        freq_0 = len(results) - freq_1
+        if min(freq_1, freq_0) == 0:
+            stable_bits += 1
+        stability[i] = freq_1 / len(results)
+
+    chip_id = kwargs.get('chip_id', 'unknown')
+    print(f'Stable bits for chip {chip_id}: {stable_bits}/{n_bits}')
+
+    plot_height = 320
+    plot_width = n_bits // plot_height
+    if n_bits % plot_height != 0:
+        logging.error("The amount of bits is not a multiple of 320.")
+
+    heat_matrix = np.reshape(stability, (plot_height, plot_width))
+
+    plt.imshow(heat_matrix, cmap='viridis',
+               interpolation='nearest',
+               vmin=0, vmax=0.5)
+
+    # Disable x and y axis ticks
+    plt.xticks([])
+    plt.yticks([])
+
+    # Colorbar with labels
+    plt.colorbar(location='bottom')
 
 
 def inter_chip_hamming_distance(all_results):
