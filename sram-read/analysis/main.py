@@ -4,7 +4,7 @@ from utils import get_files, read_results
 from analysis import (bit_error_rate,
                       autocorrelation,
                       fractional_hamming_weight,
-                      inter_chip_hamming_weight)
+                      inter_chip_hamming_distance)
 
 
 class AnalysisFunction:

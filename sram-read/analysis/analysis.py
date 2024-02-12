@@ -160,6 +160,10 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
     plt.legend()
 
 
+def stability(results: list[Result], **kwargs):
+    pass
+
+
 def inter_chip_hamming_distance(all_results):
     avg = 0.0
     for results_1, results_2 in itertools.combinations(all_results.values(),
@@ -168,5 +172,6 @@ def inter_chip_hamming_distance(all_results):
         d2 = results_2[0].data
         n_bits = d1.size
         avg += hamming_distance(d1, d2) / n_bits
-    avg /= len(all_results)
+    n = len(all_results)
+    avg /= n * (n - 1) // 2
     print(f'Inter-chip hamming distance: {avg:.6f}')
