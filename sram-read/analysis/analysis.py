@@ -91,11 +91,17 @@ def autocorrelation(results: list[Result], **kwargs):
     autocorr /= n
 
     # Spotting the max correlation value at lag = -512 and lag = 512
-    print(f'Chip {chip_id}:')
-    print(f'\tCorrelation at lag -511 : {autocorr[450046]}')
-    print(f'\tCorrelation at lag -512 : {autocorr[450047]}')
-    print(f'\tCorrelation at lag -513 : {autocorr[450048]}')
-    print(f'\tCorrelation at lag 512 : {autocorr[451071]}')
+    # print(f'Chip {chip_id}:')
+    # print(f'\tCorrelation at lag -511 : {autocorr[450046]}')
+    # print(f'\tCorrelation at lag -512 : {autocorr[450047]}')
+    # print(f'\tCorrelation at lag -513 : {autocorr[450048]}')
+    # print(f'\tCorrelation at lag 512 : {autocorr[451071]}')
+
+    sorted_autocorr = np.sort(np.abs(autocorr))
+    logging.info(f'Autocorrelation for {chip_id}:')
+    logging.info(f'\tSmallest autocorrelation value: {sorted_autocorr[0]:.5e}')
+    logging.info(f'\tLargest autocorrelation value: {sorted_autocorr[-2]:.5f}')
+    logging.info(f'\tAutocorrelation average: {np.mean(autocorr):.5e}')
 
     time_axis = np.arange(-len(data)+1, len(data))
     plt.scatter(time_axis, autocorr, marker='.')
@@ -221,7 +227,7 @@ def stability(results: list[Result], **kwargs):
             stable_bits += 1
         stability[i] = freq_1 / len(results)
 
-    logging.info(f'Stable bits for chip {chip_id}: {stable_bits}/{n_bits}')
+    logging.info(f'Stable bits for chip {chip_id}: {stable_bits/n_bits:.5f}')
 
     plot_height = 50
     plot_width = 100
@@ -291,10 +297,18 @@ def intra_chip_min_entropy(_, **kwargs):
         return
 
     n_bits = bit_freq_1.size
-    avg = 0.0
+    avg_ent = 0.0
+    min_ent = np.inf
+    max_ent = -np.inf
     for i in range(n_bits):
         p = bit_freq_1[i] / 1000
-        avg += -np.log2(max(p, 1-p))
-    avg /= n_bits
+        val = -np.log2(max(p, 1-p))
+        min_ent = min(min_ent, val)
+        max_ent = max(max_ent, val)
+        avg_ent += val
+    avg_ent /= n_bits
 
-    logging.info(f'Intra-chip min. entropy for chip {chip_id}: {avg:.5f}')
+    logging.info(f'Intra-chip min. entropy for chip {chip_id}:')
+    logging.info(f'\tMinimum: {min_ent:.5f}')
+    logging.info(f'\tMaximum: {max_ent:.5f}')
+    logging.info(f'\tAverage: {avg_ent:.5f}')
