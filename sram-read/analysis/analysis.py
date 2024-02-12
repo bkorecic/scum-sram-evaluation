@@ -58,9 +58,9 @@ def bit_error_rate(results: list[Result], **kwargs):
     ber = avg_hd / n_bits
     error_rates = np.round(hds / n_bits, 4)
     logging.info(f'Chip {chip_id}:')
-    logging.info(f'\tAverage BER (bit error rate): {ber:.2%}')
-    logging.info(f'\tMinimum BER (bit error rate): {min_hd / n_bits:.2%}')
-    logging.info(f'\tMaximum BER (bit error rate): {max_hd / n_bits:.2%}')
+    logging.info(f'\tAverage BER (bit error rate): {ber:.5%}')
+    logging.info(f'\tMinimum BER (bit error rate): {min_hd / n_bits:.5%}')
+    logging.info(f'\tMaximum BER (bit error rate): {max_hd / n_bits:.5%}')
 
     unique, counts = np.unique(error_rates, return_counts=True)
     plt.plot(unique, counts, label=chip_id)
@@ -147,9 +147,9 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
 
     logging.info(
         f'Chip {chip_id}:')
-    logging.info(f'\tMinimum FHW: {min_fhw:.6f}')
-    logging.info(f'\tMaximum FHW: {max_fhw:.6f}')
-    logging.info(f'\tAverage FHW: {avg_fhw:.6f}')
+    logging.info(f'\tMinimum FHW: {min_fhw:.5f}')
+    logging.info(f'\tMaximum FHW: {max_fhw:.5f}')
+    logging.info(f'\tAverage FHW: {avg_fhw:.5f}')
 
     # Parameters for the binomial distribution
     n = n_bits
@@ -259,9 +259,9 @@ def inter_chip_hamming_distance(all_results):
     n = len(all_results)
     avg /= n * (n - 1) // 2
     logging.info('Inter-chip fractional hamming distance:')
-    logging.info(f'\tAverage: {avg:.6f}')
-    logging.info(f'\tMinimum: {min_fhd:.6f}')
-    logging.info(f'\tMaximum: {max_fhd:.6f}')
+    logging.info(f'\tAverage: {avg:.5f}')
+    logging.info(f'\tMinimum: {min_fhd:.5f}')
+    logging.info(f'\tMaximum: {max_fhd:.5f}')
 
 
 def inter_chip_min_entropy(all_results):
@@ -277,7 +277,7 @@ def inter_chip_min_entropy(all_results):
     for bit_prob_1 in prob_1:
         avg += -np.log2(max(bit_prob_1, 1-bit_prob_1))
     avg /= n_bits
-    logging.info(f'Inter-chip min. entropy: {avg:.6f}')
+    logging.info(f'Inter-chip min. entropy: {avg:.5f}')
 
 
 def intra_chip_min_entropy(_, **kwargs):
@@ -297,4 +297,4 @@ def intra_chip_min_entropy(_, **kwargs):
         avg += -np.log2(max(p, 1-p))
     avg /= n_bits
 
-    logging.info(f'Intra-chip min. entropy for chip {chip_id}: {avg:.6f}')
+    logging.info(f'Intra-chip min. entropy for chip {chip_id}: {avg:.5f}')
