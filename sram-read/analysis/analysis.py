@@ -166,12 +166,21 @@ def stability(results: list[Result], **kwargs):
 
 def inter_chip_hamming_distance(all_results):
     avg = 0.0
+    min_fhd = np.inf
+    max_fhd = -np.inf
     for results_1, results_2 in itertools.combinations(all_results.values(),
                                                        r=2):
         d1 = results_1[0].data
         d2 = results_2[0].data
         n_bits = d1.size
-        avg += hamming_distance(d1, d2) / n_bits
+        # Calculate fractional hamming distance
+        fhd = hamming_distance(d1, d2) / n_bits
+        min_fhd = min(min_fhd, fhd)
+        max_fhd = max(max_fhd, fhd)
+        avg += fhd
     n = len(all_results)
     avg /= n * (n - 1) // 2
-    print(f'Inter-chip hamming distance: {avg:.6f}')
+    print('Inter-chip fractional hamming distance:')
+    print(f'\tAverage: {avg:.6f}')
+    print(f'\tMinimum: {min_fhd:.6f}')
+    print(f'\tMaximum: {max_fhd:.6f}')
