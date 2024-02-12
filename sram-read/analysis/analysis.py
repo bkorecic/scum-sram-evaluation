@@ -224,3 +224,19 @@ def inter_chip_hamming_distance(all_results):
     print(f'\tAverage: {avg:.6f}')
     print(f'\tMinimum: {min_fhd:.6f}')
     print(f'\tMaximum: {max_fhd:.6f}')
+
+
+def inter_chip_min_entropy(all_results):
+    avg = 0.0
+    n_bits = list(all_results.values())[0][0].data.size
+    n_chips = len(all_results.values())
+    # frequency of occurence of 1 at different positions
+    freq_1 = np.zeros(n_bits)
+    for results in all_results.values():
+        freq_1 = np.add(freq_1, results[0].data)
+    prob_1 = freq_1 / n_chips
+
+    for bit_prob_1 in prob_1:
+        avg += -np.log2(max(bit_prob_1, 1-bit_prob_1))
+    avg /= n_bits
+    print(f'Inter-chip min. entropy: {avg}')
