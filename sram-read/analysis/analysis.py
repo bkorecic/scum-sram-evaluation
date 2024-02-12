@@ -2,10 +2,10 @@ import numpy as np
 import logging
 import itertools
 import matplotlib.pyplot as plt
-import math
+import pathlib
 from scipy.signal import correlate
 from scipy.stats import binom
-from utils import Result, hamming_distance
+from utils import Result, hamming_distance, numpy_data_dir
 from matplotlib.ticker import PercentFormatter
 
 
@@ -48,10 +48,10 @@ def bit_error_rate(results: list[Result], **kwargs):
     # Divide by amount of bits to get BER percentage
     ber = avg_hd / n_bits
     error_rates = np.round(hds / n_bits, 4)
-    print(f'Chip {chip_id}:')
-    print(f'\tAverage BER (bit error rate): {ber:.2%}')
-    print(f'\tMinimum BER (bit error rate): {min_hd / n_bits:.2%}')
-    print(f'\tMaximum BER (bit error rate): {max_hd / n_bits:.2%}')
+    logging.info(f'Chip {chip_id}:')
+    logging.info(f'\tAverage BER (bit error rate): {ber:.2%}')
+    logging.info(f'\tMinimum BER (bit error rate): {min_hd / n_bits:.2%}')
+    logging.info(f'\tMaximum BER (bit error rate): {max_hd / n_bits:.2%}')
 
     unique, counts = np.unique(error_rates, return_counts=True)
     plt.plot(unique, counts, label=chip_id)
@@ -131,7 +131,7 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
         avg_fhw += np.mean(result.data)
     avg_fhw /= len(results)
 
-    print(f'Fractional hamming weight for chip {chip_id}: {avg_fhw:.6f}')
+    logging.info(f'Fractional hamming weight for chip {chip_id}: {avg_fhw:.6f}')
 
     # Parameters for the binomial distribution
     n = n_bits
@@ -161,6 +161,23 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
     plt.legend()
 
 
+def calculate_frequencies(results: list[Result], **kwargs):
+    """
+    Calculate the frequency of 1 in each bit position for all the given chips
+    and store it in numpy files.
+    """
+    chip_id = kwargs.get('chip_id', 'unknown')
+    results = results[:1000]  # Use first 1000 results
+    n_bits = results[0].data.size
+    bit_freq_1 = np.zeros(n_bits)  # Frequency of 1 in each bit position
+    for result in results:
+        for i in range(n_bits):
+            bit_freq_1[i] += result.data[i]
+    filename = f'bit_freq_1_{chip_id}.npy'
+    np.save(pathlib.Path(numpy_data_dir / filename), bit_freq_1)
+    logging.info(f'Saved bit frequencies for chip {chip_id} to {filename}')
+
+
 def stability(results: list[Result], **kwargs):
     if len(results) < 1000:
         logging.error("Need at least 1000 results to analyse stability.")
@@ -168,10 +185,14 @@ def stability(results: list[Result], **kwargs):
     results = results[:1000]
     n_bits = results[0].data.size
 
-    bit_freq_1 = np.zeros(n_bits)  # Frequency of 1 in each bit position
-    for result in results:
-        for i in range(n_bits):
-            bit_freq_1[i] += result.data[i]
+    chip_id = kwargs.get('chip_id', 'unknown')
+    # Load bit_freq_1 from numpy file
+    try:
+        bit_freq_1 = np.load(
+            pathlib.Path(numpy_data_dir / f'bit_freq_1_{chip_id}.npy'))
+    except OSError as e:
+        logging.error(f'Could not load bit_freq_1_{chip_id}.npy: {e}')
+        return
 
     stable_bits = 0
     stability = np.empty(n_bits, dtype=np.float64)
@@ -182,17 +203,16 @@ def stability(results: list[Result], **kwargs):
             stable_bits += 1
         stability[i] = freq_1 / len(results)
 
-    chip_id = kwargs.get('chip_id', 'unknown')
-    print(f'Stable bits for chip {chip_id}: {stable_bits}/{n_bits}')
+    logging.info(f'Stable bits for chip {chip_id}: {stable_bits}/{n_bits}')
 
-    plot_height = 320
-    plot_width = n_bits // plot_height
-    if n_bits % plot_height != 0:
-        logging.error("The amount of bits is not a multiple of 320.")
+    plot_height = 50
+    plot_width = 100
+    bits_to_plot = plot_height * plot_width
 
-    heat_matrix = np.reshape(stability, (plot_height, plot_width))
+    heat_matrix = np.reshape(stability[:bits_to_plot],
+                             (plot_height, plot_width))
 
-    plt.imshow(heat_matrix, cmap='viridis',
+    plt.imshow(heat_matrix, cmap='RdBu',
                interpolation='nearest',
                vmin=0, vmax=0.5)
 
@@ -200,8 +220,8 @@ def stability(results: list[Result], **kwargs):
     plt.xticks([])
     plt.yticks([])
 
-    # Colorbar with labels
-    plt.colorbar(location='bottom')
+    # Colorbar
+    plt.colorbar(location='bottom', pad=0.05)
 
 
 def inter_chip_hamming_distance(all_results):
@@ -220,7 +240,7 @@ def inter_chip_hamming_distance(all_results):
         avg += fhd
     n = len(all_results)
     avg /= n * (n - 1) // 2
-    print('Inter-chip fractional hamming distance:')
-    print(f'\tAverage: {avg:.6f}')
-    print(f'\tMinimum: {min_fhd:.6f}')
-    print(f'\tMaximum: {max_fhd:.6f}')
+    logging.info('Inter-chip fractional hamming distance:')
+    logging.info(f'\tAverage: {avg:.6f}')
+    logging.info(f'\tMinimum: {min_fhd:.6f}')
+    logging.info(f'\tMaximum: {max_fhd:.6f}')

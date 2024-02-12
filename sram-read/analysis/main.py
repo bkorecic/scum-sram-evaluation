@@ -5,7 +5,8 @@ from analysis import (bit_error_rate,
                       autocorrelation,
                       fractional_hamming_weight,
                       inter_chip_hamming_distance,
-                      stability)
+                      stability,
+                      calculate_frequencies)
 
 
 class AnalysisFunction:
@@ -19,7 +20,8 @@ ANALYSIS_FUNCTIONS = {
     "Error rate analysis (plot+data)": AnalysisFunction(bit_error_rate),
     "Fractional Hamming Weight (plot+data)": AnalysisFunction(fractional_hamming_weight),
     "Inter-chip hamming distance": AnalysisFunction(inter_chip_hamming_distance, inter=True),
-    "Cell stability (heatmap plot)": AnalysisFunction(stability)
+    "Calculate frequencies": AnalysisFunction(calculate_frequencies),
+    "Cell stability (heatmap plot+data), requires frequencies": AnalysisFunction(stability)
 }
 
 

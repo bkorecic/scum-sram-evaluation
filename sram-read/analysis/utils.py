@@ -2,6 +2,8 @@ import pathlib
 import pickle
 import numpy as np
 
+numpy_data_dir = pathlib.Path(__file__).parent.absolute() / 'numpy_data'
+numpy_data_dir.mkdir(exist_ok=True)
 
 class Result:
     """
