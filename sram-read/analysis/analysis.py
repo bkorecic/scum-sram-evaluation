@@ -136,12 +136,20 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
     n_bits = results[0].data.size
 
     avg_fhw = 0.0
+    min_fhw = np.inf
+    max_fhw = -np.inf
     for result in results:
-        avg_fhw += np.mean(result.data)
+        val = np.mean(result.data)
+        min_fhw = min(min_fhw, val)
+        max_fhw = max(max_fhw, val)
+        avg_fhw += val
     avg_fhw /= len(results)
 
     logging.info(
-        f'Fractional hamming weight for chip {chip_id}: {avg_fhw:.6f}')
+        f'Chip {chip_id}:')
+    logging.info(f'\tMinimum FHW: {min_fhw:.6f}')
+    logging.info(f'\tMaximum FHW: {max_fhw:.6f}')
+    logging.info(f'\tAverage FHW: {avg_fhw:.6f}')
 
     # Parameters for the binomial distribution
     n = n_bits
