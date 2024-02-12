@@ -6,6 +6,7 @@ from analysis import (bit_error_rate,
                       fractional_hamming_weight,
                       inter_chip_hamming_distance,
                       stability,
+                      inter_chip_min_entropy,
                       calculate_frequencies)
 
 
@@ -21,7 +22,8 @@ ANALYSIS_FUNCTIONS = {
     "Fractional Hamming Weight (plot+data)": AnalysisFunction(fractional_hamming_weight),
     "Inter-chip hamming distance": AnalysisFunction(inter_chip_hamming_distance, inter=True),
     "Calculate frequencies": AnalysisFunction(calculate_frequencies),
-    "Cell stability (heatmap plot+data), requires frequencies": AnalysisFunction(stability)
+    "Cell stability (heatmap plot+data), requires frequencies": AnalysisFunction(stability),
+    "Inter-Chip min. entropy (data)": AnalysisFunction(inter_chip_min_entropy, inter=True)
 }
 
 
@@ -56,3 +58,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
