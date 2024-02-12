@@ -9,6 +9,15 @@ from utils import Result, hamming_distance, numpy_data_dir
 from matplotlib.ticker import PercentFormatter
 
 
+# Define a custom formatter
+formatter = logging.Formatter(
+    '[%(levelname)s][%(asctime)s] | %(message)s', datefmt='%H:%M:%S')
+
+# Configure the logging system with the custom formatter and set the level to INFO
+logging.basicConfig(level=logging.INFO,
+                    format='[%(levelname)s][%(asctime)s] | %(message)s', datefmt='%H:%M:%S')
+
+
 def bit_error_rate(results: list[Result], **kwargs):
     """
     Given a list of results, calculate metrics related to the bit error rate.
@@ -131,7 +140,8 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
         avg_fhw += np.mean(result.data)
     avg_fhw /= len(results)
 
-    logging.info(f'Fractional hamming weight for chip {chip_id}: {avg_fhw:.6f}')
+    logging.info(
+        f'Fractional hamming weight for chip {chip_id}: {avg_fhw:.6f}')
 
     # Parameters for the binomial distribution
     n = n_bits
@@ -214,7 +224,7 @@ def stability(results: list[Result], **kwargs):
 
     plt.imshow(heat_matrix, cmap='RdBu',
                interpolation='nearest',
-               vmin=0, vmax=0.5)
+               vmin=0, vmax=1.0)
 
     # Disable x and y axis ticks
     plt.xticks([])
@@ -259,4 +269,24 @@ def inter_chip_min_entropy(all_results):
     for bit_prob_1 in prob_1:
         avg += -np.log2(max(bit_prob_1, 1-bit_prob_1))
     avg /= n_bits
-    print(f'Inter-chip min. entropy: {avg}')
+    logging.info(f'Inter-chip min. entropy: {avg:.6f}')
+
+
+def intra_chip_min_entropy(_, **kwargs):
+    chip_id = kwargs.get('chip_id', 'unknown')
+    # Load bit_freq_1 from numpy file
+    try:
+        bit_freq_1 = np.load(
+            pathlib.Path(numpy_data_dir / f'bit_freq_1_{chip_id}.npy'))
+    except OSError as e:
+        logging.error(f'Could not load bit_freq_1_{chip_id}.npy: {e}')
+        return
+
+    n_bits = bit_freq_1.size
+    avg = 0.0
+    for i in range(n_bits):
+        p = bit_freq_1[i] / 1000
+        avg += -np.log2(max(p, 1-p))
+    avg /= n_bits
+
+    logging.info(f'Intra-chip min. entropy for chip {chip_id}: {avg:.6f}')
