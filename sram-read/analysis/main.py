@@ -50,11 +50,12 @@ def main():
 
     for fun_name in functions_to_run:
         fun = ANALYSIS_FUNCTIONS[fun_name]
+        fig, ax = plt.subplots()
         if fun.inter:
-            fun.fun(all_results)
+            fun.fun(all_results, ax=ax, fig=fig)
         else:
             for i, chip_id in enumerate(chips_to_evaluate):
-                fun.fun(all_results[chip_id], chip_id=chip_id, chip_index=i)
+                fun.fun(all_results[chip_id], chip_id=chip_id, chip_index=i, ax=ax, fig=fig)
         plt.show()
 
 

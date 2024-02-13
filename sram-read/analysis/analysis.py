@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pathlib
 from scipy.signal import correlate
 from scipy.stats import binom
-from utils import Result, hamming_distance, numpy_data_dir
+from utils import Result, ResultList, hamming_distance, numpy_data_dir
 from matplotlib.ticker import PercentFormatter
 
 
@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO,
                     format='[%(levelname)s][%(asctime)s] | %(message)s', datefmt='%H:%M:%S')
 
 
-def bit_error_rate(results: list[Result], **kwargs):
+def bit_error_rate(results: ResultList, **kwargs):
     """
     Given a list of results, calculate metrics related to the bit error rate.
 
@@ -73,7 +73,7 @@ def bit_error_rate(results: list[Result], **kwargs):
     plt.gca().xaxis.set_major_formatter(PercentFormatter(xmax=1.0, decimals=2))
 
 
-def autocorrelation(results: list[Result], **kwargs):
+def autocorrelation(results: ResultList, **kwargs):
     """
     Given a list of results, calculate the autocorrelation.
 
@@ -124,7 +124,7 @@ def autocorrelation(results: list[Result], **kwargs):
     return None
 
 
-def fractional_hamming_weight(results: list[Result], **kwargs):
+def fractional_hamming_weight(results: ResultList, **kwargs):
     """
     Given a list of results, calculate the fractional hamming weight.
 
@@ -185,7 +185,7 @@ def fractional_hamming_weight(results: list[Result], **kwargs):
     plt.legend()
 
 
-def calculate_frequencies(results: list[Result], **kwargs):
+def calculate_frequencies(results: ResultList, **kwargs):
     """
     Calculate the frequency of 1 in each bit position for all the given chips
     and store it in numpy files.
@@ -202,7 +202,7 @@ def calculate_frequencies(results: list[Result], **kwargs):
     logging.info(f'Saved bit frequencies for chip {chip_id} to {filename}')
 
 
-def stability(results: list[Result], **kwargs):
+def stability(results: ResultList, **kwargs):
     if len(results) < 1000:
         logging.error("Need at least 1000 results to analyse stability.")
         return
@@ -248,10 +248,15 @@ def stability(results: list[Result], **kwargs):
     plt.colorbar(location='bottom', pad=0.05)
 
 
-def inter_chip_hamming_distance(all_results):
+def inter_chip_hamming_distance(all_results, **kwargs):
     avg = 0.0
     min_fhd = np.inf
     max_fhd = -np.inf
+    chip_ids = [results.chip_id for results in all_results.values()]
+    chip_ids.sort()
+    # Dict to map chip_id to index
+    chip_index = {chip_id: i for i, chip_id in enumerate(chip_ids)}
+    hd_matrix = np.zeros((len(all_results), len(all_results)))
     for results_1, results_2 in itertools.combinations(all_results.values(),
                                                        r=2):
         d1 = results_1[0].data
@@ -262,6 +267,8 @@ def inter_chip_hamming_distance(all_results):
         min_fhd = min(min_fhd, fhd)
         max_fhd = max(max_fhd, fhd)
         avg += fhd
+        hd_matrix[chip_index[results_1.chip_id]][chip_index[results_2.chip_id]] = fhd
+        hd_matrix[chip_index[results_2.chip_id]][chip_index[results_1.chip_id]] = fhd
     n = len(all_results)
     avg /= n * (n - 1) // 2
     logging.info('Inter-chip fractional hamming distance:')
@@ -269,8 +276,27 @@ def inter_chip_hamming_distance(all_results):
     logging.info(f'\tMinimum: {min_fhd:.5f}')
     logging.info(f'\tMaximum: {max_fhd:.5f}')
 
+    plt.imshow(hd_matrix, cmap='viridis', vmin=0, vmax=1.0)
+    ax = kwargs.get('ax')
+    ax.set_xticks(np.arange(len(chip_ids)), labels=chip_ids)
+    ax.set_yticks(np.arange(len(chip_ids)), labels=chip_ids)
 
-def inter_chip_min_entropy(all_results):
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+         rotation_mode="anchor")
+    
+    # Add text annotations
+    for i in range(len(chip_ids)):
+        for j in range(len(chip_ids)):
+            text = ax.text(j, i, f'{hd_matrix[i, j]:.3f}',
+                           ha="center", va="center", color="w")
+
+    plt.title('Inter-chip fractional hamming distance')
+    plt.colorbar()
+
+
+
+def inter_chip_min_entropy(all_results, **kwargs):
     avg = 0.0
     n_bits = list(all_results.values())[0][0].data.size
     n_chips = len(all_results.values())

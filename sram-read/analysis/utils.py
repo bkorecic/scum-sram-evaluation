@@ -5,6 +5,7 @@ import numpy as np
 numpy_data_dir = pathlib.Path(__file__).parent.absolute() / 'numpy_data'
 numpy_data_dir.mkdir(exist_ok=True)
 
+
 class Result:
     """
     Class to represent a single readout from a chip
@@ -17,6 +18,17 @@ class Result:
         self.start_timestamp = start_timestamp
         self.end_timestamp = end_timestamp
         self.data = np.unpackbits(np.frombuffer(data, dtype=np.uint8))
+
+
+class ResultList (list):
+    """
+    Class to represent a list of results from a chip. Has the same interface
+    as a python list but adds a "chip_id" attribute
+    """
+
+    def __init__(self, chip_id: str, *args):
+        super().__init__(*args)
+        self.chip_id = chip_id
 
 
 def hamming_distance(bit_arr1: np.ndarray, bit_arr2: np.ndarray) -> int:
@@ -42,14 +54,14 @@ def get_files() -> dict:
     return ret_files
 
 
-def read_results(files: list[pathlib.Path]) -> list[Result]:
+def read_results(files: list[pathlib.Path]) -> ResultList:
     """
     Read, unpickle, merge and return a list of result files
 
     files -- list of paths to result files
     """
     files.sort()  # Sort to read chronologically
-    results = []
+    results = ResultList(files[0].parts[-1].split('-')[0])
     for fp in files:
         with open(fp, 'rb') as f:
             try:
