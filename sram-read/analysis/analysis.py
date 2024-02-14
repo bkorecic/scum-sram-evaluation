@@ -245,7 +245,8 @@ def stability(results: ResultList, **kwargs):
     plt.yticks([])
 
     # Colorbar
-    plt.colorbar(location='bottom', pad=0.05)
+    colorbar = plt.colorbar(location='bottom', pad=0.05)
+    colorbar.set_ticks([0, 0.5, 1.0])
 
 
 def inter_chip_hamming_distance(all_results, **kwargs):
@@ -267,8 +268,10 @@ def inter_chip_hamming_distance(all_results, **kwargs):
         min_fhd = min(min_fhd, fhd)
         max_fhd = max(max_fhd, fhd)
         avg += fhd
-        hd_matrix[chip_index[results_1.chip_id]][chip_index[results_2.chip_id]] = fhd
-        hd_matrix[chip_index[results_2.chip_id]][chip_index[results_1.chip_id]] = fhd
+        hd_matrix[chip_index[results_1.chip_id]
+                  ][chip_index[results_2.chip_id]] = fhd
+        hd_matrix[chip_index[results_2.chip_id]
+                  ][chip_index[results_1.chip_id]] = fhd
     n = len(all_results)
     avg /= n * (n - 1) // 2
     logging.info('Inter-chip fractional hamming distance:')
@@ -283,8 +286,8 @@ def inter_chip_hamming_distance(all_results, **kwargs):
 
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-         rotation_mode="anchor")
-    
+             rotation_mode="anchor")
+
     # Add text annotations
     for i in range(len(chip_ids)):
         for j in range(len(chip_ids)):
@@ -293,7 +296,6 @@ def inter_chip_hamming_distance(all_results, **kwargs):
 
     plt.title('Inter-chip fractional hamming distance')
     plt.colorbar()
-
 
 
 def inter_chip_min_entropy(all_results, **kwargs):
