@@ -10,7 +10,7 @@ from utils import ResultList, hamming_distance, numpy_data_dir
 from matplotlib.ticker import PercentFormatter
 
 
-def bit_error_rate(results: ResultList, **kwargs):
+def bit_error_rate(results: ResultList, chip_id: str, **kwargs):
     """
     Given a list of results, calculate metrics related to the bit error rate.
 
@@ -21,8 +21,6 @@ def bit_error_rate(results: ResultList, **kwargs):
 
     results -- list of results to analyse the BER. Must have at least 2
     """
-    chip_id = kwargs.get('chip_id', 'unknown')
-
     n_bits = results[0].data.size
     nominal_data = results[0].data
     results = results[1:constants.READINGS_TO_ANALYZE]
@@ -61,7 +59,7 @@ def bit_error_rate(results: ResultList, **kwargs):
     plt.gca().xaxis.set_major_formatter(PercentFormatter(xmax=1.0, decimals=2))
 
 
-def autocorrelation(results: ResultList, **kwargs):
+def autocorrelation(results: ResultList, chip_id: str, **kwargs):
     """
     Given a list of results, calculate the autocorrelation.
 
@@ -70,7 +68,6 @@ def autocorrelation(results: ResultList, **kwargs):
     results -- list of results to analyse the autocorrelation.
                Only the first one will be used.
     """
-    chip_id = kwargs.get('chip_id', 'unknown')
     data = results[0].data.astype(np.int8)
     n = len(data)
     data[data == 0] = -1  # Replace 0s with -1s
@@ -93,7 +90,7 @@ def autocorrelation(results: ResultList, **kwargs):
     plt.show()
 
 
-def fractional_hamming_weight(results: ResultList, **kwargs):
+def fractional_hamming_weight(results: ResultList, chip_id: str, **kwargs):
     """
     Given a list of results, calculate the fractional hamming weight.
 
@@ -101,7 +98,6 @@ def fractional_hamming_weight(results: ResultList, **kwargs):
     calculated for all the (first 1000) results as the average bit value,
     and then the average between all of them is calculated.
     """
-    chip_id = kwargs.get('chip_id', 'unknown')
     n_bits = results[0].data.size
 
     avg_fhw = 0.0
@@ -148,7 +144,7 @@ def fractional_hamming_weight(results: ResultList, **kwargs):
     plt.legend()
 
 
-def calculate_frequencies(results: ResultList, **kwargs):
+def calculate_frequencies(results: ResultList, chip_id: str, **kwargs):
     """
     Calculate the frequency of 1 in each bit position for all the given chips
     and store it in numpy files.
@@ -164,10 +160,9 @@ def calculate_frequencies(results: ResultList, **kwargs):
     logging.info(f'Saved bit frequencies for chip {chip_id} to {filename}')
 
 
-def stability(results: ResultList, **kwargs):
+def stability(results: ResultList, chip_id: str, **kwargs):
     n_bits = results[0].data.size
 
-    chip_id = kwargs.get('chip_id', 'unknown')
     # Load bit_freq_1 from numpy file
     try:
         bit_freq_1 = np.load(
@@ -207,7 +202,7 @@ def stability(results: ResultList, **kwargs):
     colorbar.set_ticks([0, 0.5, 1.0])
 
 
-def inter_chip_hamming_distance(all_results, **kwargs):
+def inter_chip_hamming_distance(all_results: list[ResultList], **kwargs):
     avg = 0.0
     min_fhd = np.inf
     max_fhd = -np.inf
@@ -256,7 +251,7 @@ def inter_chip_hamming_distance(all_results, **kwargs):
     plt.colorbar()
 
 
-def inter_chip_min_entropy(all_results, **kwargs):
+def inter_chip_min_entropy(all_results: list[ResultList], **kwargs):
     avg = 0.0
     n_bits = list(all_results.values())[0][0].data.size
     n_chips = len(all_results.values())
@@ -272,8 +267,7 @@ def inter_chip_min_entropy(all_results, **kwargs):
     logging.info(f'Inter-chip min. entropy: {avg:.5f}')
 
 
-def intra_chip_min_entropy(_, **kwargs):
-    chip_id = kwargs.get('chip_id', 'unknown')
+def intra_chip_min_entropy(chip_id: str, **kwargs):
     # Load bit_freq_1 from numpy file
     try:
         bit_freq_1 = np.load(
