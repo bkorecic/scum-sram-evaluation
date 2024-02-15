@@ -16,9 +16,10 @@ from analysis import (bit_error_rate,
 formatter = logging.Formatter(
     '[%(levelname)s][%(asctime)s] | %(message)s', datefmt='%H:%M:%S')
 
-# Configure the logging system with the custom formatter and set the level to INFO
+# Configure logging with the custom formatter and set level to INFO
 logging.basicConfig(level=logging.INFO,
-                    format='[%(levelname)s][%(asctime)s] | %(message)s', datefmt='%H:%M:%S')
+                    format='[%(levelname)s][%(asctime)s] | %(message)s',
+                    datefmt='%H:%M:%S')
 
 
 class AnalysisFunction:
