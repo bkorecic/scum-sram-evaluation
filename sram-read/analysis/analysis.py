@@ -3,19 +3,11 @@ import logging
 import itertools
 import matplotlib.pyplot as plt
 import pathlib
+import constants
 from scipy.signal import correlate
 from scipy.stats import binom
-from utils import Result, ResultList, hamming_distance, numpy_data_dir
+from utils import ResultList, hamming_distance, numpy_data_dir
 from matplotlib.ticker import PercentFormatter
-
-
-# Define a custom formatter
-formatter = logging.Formatter(
-    '[%(levelname)s][%(asctime)s] | %(message)s', datefmt='%H:%M:%S')
-
-# Configure the logging system with the custom formatter and set the level to INFO
-logging.basicConfig(level=logging.INFO,
-                    format='[%(levelname)s][%(asctime)s] | %(message)s', datefmt='%H:%M:%S')
 
 
 def bit_error_rate(results: ResultList, **kwargs):
@@ -29,15 +21,11 @@ def bit_error_rate(results: ResultList, **kwargs):
 
     results -- list of results to analyse the BER. Must have at least 2
     """
-    if len(results) < 1001:
-        logging.error("Need at least 1001 results to analyse error rates.")
-        return
-
     chip_id = kwargs.get('chip_id', 'unknown')
 
     n_bits = results[0].data.size
     nominal_data = results[0].data
-    results = results[1:1+1000]
+    results = results[1:constants.READINGS_TO_ANALYZE]
 
     hds = np.empty(len(results))  # Hamming distances
     avg_hd = 0.0
@@ -90,13 +78,6 @@ def autocorrelation(results: ResultList, **kwargs):
     autocorr = correlate(data, data, mode='full', method='fft')
     autocorr /= n
 
-    # Spotting the max correlation value at lag = -512 and lag = 512
-    # print(f'Chip {chip_id}:')
-    # print(f'\tCorrelation at lag -511 : {autocorr[450046]}')
-    # print(f'\tCorrelation at lag -512 : {autocorr[450047]}')
-    # print(f'\tCorrelation at lag -513 : {autocorr[450048]}')
-    # print(f'\tCorrelation at lag 512 : {autocorr[451071]}')
-
     sorted_autocorr = np.sort(np.abs(autocorr))
     logging.info(f'Autocorrelation for {chip_id}:')
     logging.info(f'\tSmallest autocorrelation value: {sorted_autocorr[0]:.5e}')
@@ -111,18 +92,6 @@ def autocorrelation(results: ResultList, **kwargs):
     plt.tight_layout()
     plt.show()
 
-    # Derive the highest three autocorrelation values and their corresponding lag values
-    # takes too much time
-    # top3_ind = np.argpartition(autocorr, -3)[-3:]
-    # print('test')
-    # print(f'test: {top3_ind}')
-    # top3_val = autocorr[top3_ind]
-    # top3_lag = time_axis[top3_ind]
-    # print(f'Maximum autocorrelation values: {top3_val}:')
-    # print(f'Their indices: {top3_lag}')
-
-    return None
-
 
 def fractional_hamming_weight(results: ResultList, **kwargs):
     """
@@ -132,12 +101,6 @@ def fractional_hamming_weight(results: ResultList, **kwargs):
     calculated for all the (first 1000) results as the average bit value,
     and then the average between all of them is calculated.
     """
-    if len(results) < 1001:
-        logging.error("Need at least 1001 results to analyse "
-                      "fractional hamming weight.")
-        return
-
-    results = results[:1000]
     chip_id = kwargs.get('chip_id', 'unknown')
     n_bits = results[0].data.size
 
@@ -191,7 +154,6 @@ def calculate_frequencies(results: ResultList, **kwargs):
     and store it in numpy files.
     """
     chip_id = kwargs.get('chip_id', 'unknown')
-    results = results[:1000]  # Use first 1000 results
     n_bits = results[0].data.size
     bit_freq_1 = np.zeros(n_bits)  # Frequency of 1 in each bit position
     for result in results:
@@ -203,10 +165,6 @@ def calculate_frequencies(results: ResultList, **kwargs):
 
 
 def stability(results: ResultList, **kwargs):
-    if len(results) < 1000:
-        logging.error("Need at least 1000 results to analyse stability.")
-        return
-    results = results[:1000]
     n_bits = results[0].data.size
 
     chip_id = kwargs.get('chip_id', 'unknown')
@@ -329,7 +287,7 @@ def intra_chip_min_entropy(_, **kwargs):
     min_ent = np.inf
     max_ent = -np.inf
     for i in range(n_bits):
-        p = bit_freq_1[i] / 1000
+        p = bit_freq_1[i] / constants.READINGS_TO_ANALYZE
         val = -np.log2(max(p, 1-p))
         min_ent = min(min_ent, val)
         max_ent = max(max_ent, val)

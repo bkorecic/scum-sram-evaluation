@@ -1,5 +1,6 @@
 import questionary
 import matplotlib.pyplot as plt
+import logging
 from utils import get_files, read_results
 from analysis import (bit_error_rate,
                       autocorrelation,
@@ -9,6 +10,15 @@ from analysis import (bit_error_rate,
                       inter_chip_min_entropy,
                       intra_chip_min_entropy,
                       calculate_frequencies)
+
+
+# Define a custom formatter
+formatter = logging.Formatter(
+    '[%(levelname)s][%(asctime)s] | %(message)s', datefmt='%H:%M:%S')
+
+# Configure the logging system with the custom formatter and set the level to INFO
+logging.basicConfig(level=logging.INFO,
+                    format='[%(levelname)s][%(asctime)s] | %(message)s', datefmt='%H:%M:%S')
 
 
 class AnalysisFunction:

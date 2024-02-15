@@ -1,6 +1,8 @@
 import pathlib
 import pickle
 import numpy as np
+import constants
+import logging
 
 numpy_data_dir = pathlib.Path(__file__).parent.absolute() / 'numpy_data'
 numpy_data_dir.mkdir(exist_ok=True)
@@ -56,18 +58,21 @@ def get_files() -> dict:
 
 def read_results(files: list[pathlib.Path]) -> ResultList:
     """
-    Read, unpickle, merge and return a list of result files
+    Read, unpickle, merge, trim and return a list of result files
 
     files -- list of paths to result files
     """
     files.sort()  # Sort to read chronologically
-    results = ResultList(files[0].parts[-1].split('-')[0])
+    chip_id = files[0].parts[-1].split('-')[0]
+    results = ResultList(chip_id)
     for fp in files:
         with open(fp, 'rb') as f:
             try:
-                while True:
+                while len(results) < constants.READINGS_TO_ANALYZE:
                     data = pickle.load(f)
                     results.append(Result(*data))
             except EOFError:
                 pass
+    if len(results) != constants.READINGS_TO_ANALYZE:
+        logging.warning(f"Expected at least {constants.READINGS_TO_ANALYZE} readings for chip {chip_id}, got {len(results)}.")
     return results
