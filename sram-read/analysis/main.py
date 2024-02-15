@@ -55,7 +55,8 @@ def main():
             fun.fun(all_results, ax=ax, fig=fig)
         else:
             for i, chip_id in enumerate(chips_to_evaluate):
-                fun.fun(all_results[chip_id], chip_id=chip_id, chip_index=i, ax=ax, fig=fig)
+                fun.fun(all_results[chip_id], chip_id=chip_id,
+                        chip_index=i, ax=ax, fig=fig)
         plt.show()
 
 
