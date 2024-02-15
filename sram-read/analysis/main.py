@@ -1,15 +1,14 @@
 import questionary
-import matplotlib.pyplot as plt
 import logging
-from utils import get_files, read_results
-from analysis import (bit_error_rate,
-                      autocorrelation,
-                      fractional_hamming_weight,
-                      inter_chip_hamming_distance,
-                      stability,
-                      inter_chip_min_entropy,
-                      intra_chip_min_entropy,
-                      calculate_frequencies)
+from utils import get_files, read_results, ResultList
+from analysis import (BitErrorRate,
+                      Autocorrelation,
+                      FractionalHammingWeight,
+                      Frequencies,
+                      Stability,
+                      InterChipHammingDistance,
+                      InterChipMinEntropy,
+                      IntraChipMinEntropy)
 
 
 # Define a custom formatter
@@ -28,16 +27,9 @@ class AnalysisFunction:
         self.inter = inter
 
 
-ANALYSIS_FUNCTIONS = {
-    "Autocorrelation (plot+data)": AnalysisFunction(autocorrelation),
-    "Error rate analysis (plot+data)": AnalysisFunction(bit_error_rate),
-    "Fractional Hamming Weight (plot+data)": AnalysisFunction(fractional_hamming_weight),
-    "Inter-chip hamming distance (data)": AnalysisFunction(inter_chip_hamming_distance, inter=True),
-    "Calculate frequencies (files)": AnalysisFunction(calculate_frequencies),
-    "Cell stability (plot+data), requires frequencies": AnalysisFunction(stability),
-    "Inter-Chip min. entropy (data)": AnalysisFunction(inter_chip_min_entropy, inter=True),
-    "Intra-Chip min. entropy (data)": AnalysisFunction(intra_chip_min_entropy)
-}
+analysis_suite = [BitErrorRate, Autocorrelation, FractionalHammingWeight,
+                  Frequencies, Stability, InterChipHammingDistance,
+                  InterChipMinEntropy, IntraChipMinEntropy]
 
 
 def main():
@@ -51,24 +43,18 @@ def main():
         choices=all_files.keys()
     ).ask()
 
-    functions_to_run = questionary.checkbox(
+    analyses_to_run = questionary.checkbox(
         "Select the functions to run",
-        choices=ANALYSIS_FUNCTIONS.keys()
+        choices=[questionary.Choice(title=c.name, value=c)
+                 for c in analysis_suite]
     ).ask()
 
-    all_results = {chip_id: read_results(all_files[chip_id])
-                   for chip_id in chips_to_evaluate}
+    all_results: list[ResultList] = [read_results(all_files[chip_id])
+                                     for chip_id in chips_to_evaluate]
 
-    for fun_name in functions_to_run:
-        fun = ANALYSIS_FUNCTIONS[fun_name]
-        fig, ax = plt.subplots()
-        if fun.inter:
-            fun.fun(all_results=all_results, ax=ax, fig=fig)
-        else:
-            for i, chip_id in enumerate(chips_to_evaluate):
-                fun.fun(results=all_results[chip_id], chip_id=chip_id,
-                        chip_index=i, ax=ax, fig=fig)
-        plt.show()
+    for Analysis in analyses_to_run:
+        a = Analysis(all_results=all_results)
+        a.run()
 
 
 if __name__ == "__main__":
