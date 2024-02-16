@@ -7,7 +7,7 @@ import constants
 from scipy.signal import correlate
 from scipy.stats import binom
 from utils import ResultList, hamming_distance, numpy_data_dir
-from matplotlib.ticker import PercentFormatter
+from matplotlib.ticker import ScalarFormatter, PercentFormatter
 from abc import ABC, abstractmethod
 
 
@@ -182,7 +182,12 @@ class FractionalHammingWeight(ManyChipsAnalysis):
         binomial_pmf = binom.pmf(x_values, n, p)
 
         # Plot the normalized binomial distribution
-        plt.plot(x_values / n, binomial_pmf, label='Binomial Distribution')
+        plt.plot(x_values / n, binomial_pmf, label='Binomial Distribution',
+                 color='dimgray', zorder=-1.0)
+
+        # Customize the y-axis ticks and labels
+        plt.gca().yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+        plt.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
         for results in all_results:
             # Calculate min/max/avg fractional hamming weight for each chip
