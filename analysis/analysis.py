@@ -25,7 +25,13 @@ class Analysis(ABC):
         pass
 
 
-class IntraChipAnalysis(Analysis):
+class SingleChipAnalysis(Analysis):
+    """
+    Class for analyses that only require data from a single chip.
+
+    The main difference with ManyChipsAnalysis is that the process
+    method only receives the results from a single chip.
+    """
     @staticmethod
     @abstractmethod
     def process(results: ResultList, chip_id: str):
@@ -39,7 +45,13 @@ class IntraChipAnalysis(Analysis):
             self.process(results)
 
 
-class InterChipAnalysis(Analysis):
+class ManyChipsAnalysis(Analysis):
+    """
+    Class for analyses that require data from all chips.
+
+    The main difference with SingleChipAnalysis is that the process
+    method receives all the results from all chips.
+    """
     @staticmethod
     @abstractmethod
     def process(self, all_results: list[ResultList]):
@@ -52,7 +64,7 @@ class InterChipAnalysis(Analysis):
         self.process(self.all_results)
 
 
-class BitErrorRate(InterChipAnalysis):
+class BitErrorRate(ManyChipsAnalysis):
     """
     Calculate metrics related to the bit error rate.
 
@@ -110,7 +122,7 @@ class BitErrorRate(InterChipAnalysis):
         plt.show()
 
 
-class Autocorrelation(IntraChipAnalysis):
+class Autocorrelation(SingleChipAnalysis):
     """
     Calculate the autocorrelation.
 
@@ -146,7 +158,7 @@ class Autocorrelation(IntraChipAnalysis):
         plt.show()
 
 
-class FractionalHammingWeight(InterChipAnalysis):
+class FractionalHammingWeight(ManyChipsAnalysis):
     """
     Calculate the fractional hamming weight for each chip and plot
     their positions on a normalized binomial distribution.
@@ -203,7 +215,7 @@ class FractionalHammingWeight(InterChipAnalysis):
         plt.show()
 
 
-class Frequencies(IntraChipAnalysis):
+class Frequencies(SingleChipAnalysis):
     """
     Calculate the frequency of 1 in each bit position for the given chip
     and store it a numpy file for later use.
@@ -223,7 +235,7 @@ class Frequencies(IntraChipAnalysis):
             f'Saved bit frequencies for chip {results.chip_id} to {filename}')
 
 
-class Stability(IntraChipAnalysis):
+class Stability(SingleChipAnalysis):
     """
     Calculate the stability of each bit position for the given chip.
 
@@ -279,7 +291,7 @@ class Stability(IntraChipAnalysis):
         plt.show()
 
 
-class InterChipHammingDistance(InterChipAnalysis):
+class InterChipHammingDistance(ManyChipsAnalysis):
     """
     Calculate the inter-chip (fractional) hamming distance average between all
     pairs of chips and plot the results in a heatmap.
@@ -334,7 +346,7 @@ class InterChipHammingDistance(InterChipAnalysis):
         plt.show()
 
 
-class InterChipMinEntropy(InterChipAnalysis):
+class InterChipMinEntropy(ManyChipsAnalysis):
     """
     Calculate the minimum entropy for all chips.
     """
@@ -358,7 +370,7 @@ class InterChipMinEntropy(InterChipAnalysis):
         logging.info(f'Inter-chip min. entropy: {avg:.5f}')
 
 
-class IntraChipMinEntropy(IntraChipAnalysis):
+class IntraChipMinEntropy(SingleChipAnalysis):
     """
     Calculate the minimum entropy for a chip.
     """
