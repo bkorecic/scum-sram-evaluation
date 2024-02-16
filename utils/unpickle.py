@@ -8,6 +8,9 @@ def unpickle(pickle_path):
     Receives a path to a pickle results file.
     De-serializes it and prints the timestamps
     and the first 50 bytes of the data.
+
+    Useful if you want to manually inspect the
+    results of a chip.
     """
     data = []
     with open(pickle_path, 'rb') as f:
