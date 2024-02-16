@@ -18,7 +18,7 @@ Install the required libraries
 python3 -m pip install -r requirements.txt
 ```
 
-Run the entry file
+Run the entry point
 ```bash
 python3 main.py
 ```
