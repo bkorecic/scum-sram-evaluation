@@ -23,7 +23,7 @@ Run the entry point
 python3 main.py
 ```
 
-Then follow the instruction to choose which chips
+Then follow the instructions to choose which chips
 you want to evaluate and what metrics to run.
 
 ## Implemented metrics
